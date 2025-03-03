@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Currency Converter</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: white;
+      color: black;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    .container {
+      border: 2px solid #000;
+      background-color: #add8e6;
+      padding: 20px;
+      display: inline-block;
+      width: 80%;
+      margin: 0 auto;
+    }
+
+    body.night-mode {
+      background-color: #2e2e2e; 
+      color: #030303; 
+    }
+
+    .container.night-mode {
+      background-color: #3c3c3c; 
+      border-color: #555;
+    }
+
+    header {
+      background-color: #f8f8f8;
+      padding: 20px;
+    }
+
+    .converter-container {
+      margin-top: 20px;
+    }
+
+    .converter-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .converter-row input,
+    .converter-row select,
+    .converter-row button,
+    .converter-row .result-box {
+      padding: 10px;
+      font-size: 16px;
+      width: 150px;
+    }
+
+    .result-box {
+      border: 1px solid #000;
+      background-color: #fff;
+      text-align: center;
+    }
+
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+
+    .rates-container {
+      display: flex;
+      justify-content: space-between; 
+      flex-wrap: wrap; 
+    }
+
+    .exchange-rate-item {
+      padding: 5px 10px;
+      margin: 0 5px; 
+      border: 1px solid #ccc; 
+      border-radius: 5px; 
+      background-color: #f0f0f0; 
+    }
+
+    #historicalChart {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="toggleButton" style="position: absolute; top: 20px; right: 20px;">deep color mode</button>
+  <a href="readme.md" target="_blank" style="position: absolute; top: 20px; left: 20px;">Open readme</a>
+
+  <div class="container">
+    <h2>Common Exchange Rates</h2>
+    <h4>Take one US dollar as the standard</h4>
+    <div id="exchangeRateList" class="exchange-rate-container">
+      <!-- MORE DATA -->
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Currency Converter</h1>
+    </header>
+    <main>
+      <div class="converter-container">
+        <div class="converter-row">
+          <input type="number" id="amount" placeholder="Enter amount" />
+          <input type="text" id="fromCurrency" list="currencyList" placeholder="From currency (e.g., USD)"
+            oninput="this.value = this.value.toUpperCase()" />
+          <input type="text" id="toCurrency" list="currencyList" placeholder="To currency (e.g., EUR)"
+            oninput="this.value = this.value.toUpperCase()" />
+          <button id="convertButton">Convert</button>
+          <span id="result" class="result-box"></span>
+        </div>
+        <datalist id="currencyList">
+          <option value="USD">USD - US Dollar</option>
+          <option value="CNY">CNY - Chinese Yuan</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="JPY">JPY - Japanese Yen</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="AUD">AUD - Australian Dollar</option>
+          <option value="CAD">CAD - Canadian Dollar</option>
+          <option value="CHF">CHF - Swiss Franc</option>
+          <option value="INR">INR - Indian Rupee</option>
+          <option value="BRL">BRL - Brazilian Real</option>
+          <option value="RUB">RUB - Russian Ruble</option>
+          <option value="ZAR">ZAR - South African Rand</option>
+          <option value="SGD">SGD - Singapore Dollar</option>
+          <option value="HKD">HKD - Hong Kong Dollar</option>
+          <option value="NZD">NZD - New Zealand Dollar</option>
+          <option value="MXN">MXN - Mexican Peso</option>
+          <option value="KRW">KRW - South Korean Won</option>
+          <option value="MYR">MYR - Malaysian Ringgit</option>
+          <option value="BGN">BGN - Bulgarian Lev</option>
+          <option value="CZK">CZK - Czech Republic Koruna</option>
+          <option value="DKK">DKK - Danish Krone</option>
+          <option value="HUF">HUF - Hungarian Forint</option>
+          <option value="PLN">PLN - Polish Zloty</option>
+          <option value="RON">RON - Romanian Leu</option>
+          <option value="SEK">SEK - Swedish Krona</option>
+          <option value="ISK">ISK - Icelandic Króna</option>
+          <option value="NOK">NOK - Norwegian Krone</option>
+          <option value="HRK">HRK - Croatian Kuna</option>
+          <option value="TRY">TRY - Turkish Lira</option>
+          <option value="IDR">IDR - Indonesian Rupiah</option>
+          <option value="ILS">ILS - Israeli New Sheqel</option>
+          <option value="PHP">PHP - Philippine Peso</option>
+          <option value="THB">THB - Thai Baht</option>
+      </datalist>
+      </div>
+      <div class="converter-container">
+        <div class="converter-row">
+          <label for="historicalDate">Input a date:</label>
+          <input type="text" id="historicalDate" placeholder="yyyy/mm/dd" onfocus="this.placeholder=''"
+            onblur="this.placeholder='yyyy/mm/dd'" pattern="\d{4}/\d{2}/\d{2}" />
+          <select id="timeFrame">
+            <option value="weekly">Weekly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+          <button id="fetchHistoricalButton">Fetch Historical Rates</button>
+        </div>
+      </div>
+    </main>
+    <canvas id="historicalChart"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    document.getElementById('toggleButton').addEventListener('click', function() {
+        document.body.classList.toggle('night-mode'); 
+        document.querySelectorAll('.container').forEach(container => {
+            container.classList.toggle('night-mode'); 
+        });
+    });
+
+    document.getElementById('historicalDate').addEventListener('input', function (e) {
+      const value = e.target.value;
+      const regex = /^\d{0,4}\/\d{0,2}\/\d{0,2}$/; 
+      if (!regex.test(value)) {
+        e.target.setCustomValidity("Please use the format yyyy/mm/dd");
+      } else {
+        e.target.setCustomValidity("");
+      }
+    });
+  </script>
+</body>
+
+</html>
